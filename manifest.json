@@ -58,7 +58,16 @@
               "tags": {
                 "4.7.1-$(RuntimeReleaseDateStamp)-windowsservercore-ltsc2016": {},
                 "4.7.1-windowsservercore-ltsc2016": {}
-              }
+              },
+              "customBuildLegGrouping": [
+                {
+                  "name": "pr-build",
+                  "dependencies": [
+                    "$(Repo:runtime):4.7.2-windowsservercore-ltsc2016",
+                    "$(Repo:sdk):4.7.2-windowsservercore-ltsc2016"
+                  ]
+                }
+              ]
             }
           ]
         },
@@ -74,7 +83,18 @@
               "tags": {
                 "4.7-$(RuntimeReleaseDateStamp)-windowsservercore-ltsc2016": {},
                 "4.7-windowsservercore-ltsc2016": {}
-              }
+              },
+              "customBuildLegGrouping": [
+                {
+                  "name": "pr-build",
+                  "dependencies": [
+                    "$(Repo:runtime):4.7.1-windowsservercore-ltsc2016",
+                    "$(Repo:sdk):4.7.1-windowsservercore-ltsc2016",
+                    "$(Repo:runtime):4.7.2-windowsservercore-ltsc2016",
+                    "$(Repo:sdk):4.7.2-windowsservercore-ltsc2016"
+                  ]
+                }
+              ]
             }
           ]
         },
@@ -90,7 +110,18 @@
               "tags": {
                 "4.6.2-$(RuntimeReleaseDateStamp)-windowsservercore-ltsc2016": {},
                 "4.6.2-windowsservercore-ltsc2016": {}
-              }
+              },
+              "customBuildLegGrouping": [
+                {
+                  "name": "pr-build",
+                  "dependencies": [
+                    "$(Repo:runtime):4.7.1-windowsservercore-ltsc2016",
+                    "$(Repo:sdk):4.7.1-windowsservercore-ltsc2016",
+                    "$(Repo:runtime):4.7.2-windowsservercore-ltsc2016",
+                    "$(Repo:sdk):4.7.2-windowsservercore-ltsc2016"
+                  ]
+                }
+              ]
             }
           ]
         },
