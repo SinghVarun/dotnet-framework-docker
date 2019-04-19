@@ -15,7 +15,7 @@ jobs:
   pool: ${{ parameters.pool }}
   strategy:
     matrix: $[ ${{ parameters.matrix }} ]
-  timeoutInMinutes: 180
+  timeoutInMinutes: 240
   variables:
     osVersion: ${{ parameters.osVersion }}
     ${{ if eq(variables['System.TeamProject'], 'internal') }}:
@@ -27,9 +27,19 @@ jobs:
         --password $(BotAccount-dotnet-docker-acr-bot-password)
         $(imageBuilder.queueArgs)
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      imageBuilderBuildArgs: $(imageBuilder.queueArgs)
+      imageBuilderBuildArgs: >
+        $(imageBuilder.queueArgs)
+        --export-path $(System.DefaultWorkingDirectory)/published-images
   steps:
   - template: ../steps/init-docker-windows.yml
+  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    - powershell: |
+        Remove-Item -Recurse -Force "$env:SYSTEM_DEFAULTWORKINGDIRECTORY\docker"
+        New-Item -Path "$env:SYSTEM_DEFAULTWORKINGDIRECTORY\docker" -ItemType Directory
+        $config = "{ data-root: """"}" | ConvertFrom-Json
+        $config."data-root" = "$env:SYSTEM_DEFAULTWORKINGDIRECTORY\docker"
+        $config | ConvertTo-Json | Set-Content "C:\ProgramData\Docker\config\daemon.json"
+        Restart-Service docker
   - script:  >
       $(runImageBuilderCmd) build 
       --manifest $(manifest)
@@ -41,5 +51,16 @@ jobs:
       $(imageBuilderBuildArgs)
     displayName: Build Images
   - ${{ if eq(variables['System.TeamProject'], 'public') }}:
-    - template: ../steps/test-images-windows-client.yml
+    - task: PublishPipelineArtifact@0
+      inputs:
+        artifactName: published-images-$(osVersion)-$(architecture)
+        targetPath: $(System.DefaultWorkingDirectory)/published-images
+      displayName: Export Images
+    - powershell: |
+        $config = Get-Content "C:\ProgramData\Docker\config\daemon.json" | ConvertFrom-Json
+        $config."data-root" = ""
+        $config | ConvertTo-Json | Set-Content "C:\ProgramData\Docker\config\daemon.json"
+        Restart-Service docker
+        Remove-Item -Recurse -Force "$env:SYSTEM_DEFAULTWORKINGDIRECTORY\docker"
+      condition: always()
   - template: ../steps/cleanup-docker-windows.yml

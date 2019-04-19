@@ -21,4 +21,18 @@ jobs:
   strategy:
     matrix: $[ ${{ parameters.matrix }} ]
   steps:
+  - ${{ if eq(variables['System.TeamProject'], 'public') }}:
+    - task: DownloadPipelineArtifact@0
+      inputs:
+        artifactName: published-images-$(osVersion)-$(architecture)
+        targetPath: $(System.DefaultWorkingDirectory)/published-images
+    - script:  >
+        $(runImageBuilderCmd) import 
+        --manifest $(manifest)
+        $(imageBuilderPaths)
+        --os-type $(osType)
+        --os-version "$(osVersion)"
+        --architecture $(architecture)
+        --import-path $(System.DefaultWorkingDirectory)/published-images
+      displayName: Import Images
   - template: ../steps/test-images-windows-client.yml
